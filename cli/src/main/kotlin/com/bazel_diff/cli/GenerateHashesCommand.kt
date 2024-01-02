@@ -16,6 +16,7 @@ import java.util.concurrent.Callable
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.io.IOException
+import java.io.FileNotFoundException
 
 @CommandLine.Command(
     name = "generate-hashes",
@@ -57,6 +58,13 @@ class GenerateHashesCommand : Callable<Int> {
         converter = [OptionsConverter::class],
     )
     var bazelStartupOptions: List<String> = emptyList()
+
+    @CommandLine.Option(
+        names = ["--buildBuddyMode"],
+        description = ["Enable BuildBuddy mode"],
+        scope = CommandLine.ScopeType.INHERIT
+    )
+    var buildBuddyMode: Boolean = false
 
     @CommandLine.Option(
         names = ["-co", "--bazelCommandOptions"],
@@ -149,6 +157,11 @@ class GenerateHashesCommand : Callable<Int> {
         if (!::bazelPath.isInitialized) {
             bazelPath = readPathFromFile("/tmp/bazel_path", "bazelPath")
         }
+    var bazelStartupOptions: List<String> = if (buildBuddyMode) {
+        readBazelStartupOptionsFromFile("/tmp/bazel_startup_options")
+    } else {
+        emptyList()
+    }
 
         startKoin {
             modules(
@@ -184,6 +197,16 @@ class GenerateHashesCommand : Callable<Int> {
             }
         }
     }
+
+fun readBazelStartupOptionsFromFile(filePath: String): List<String> {
+    val file = File(filePath)
+    if (!file.exists()) {
+        throw FileNotFoundException("File not found: $filePath")
+    }
+    return file.readText().trim().split("\\s+".toRegex())
+}
+
+
     private fun readPathFromFile(filePath: String, paramName: String): Path {
         try {
             val path = Paths.get(filePath)
