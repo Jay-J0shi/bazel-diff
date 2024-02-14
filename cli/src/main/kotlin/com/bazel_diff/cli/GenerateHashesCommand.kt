@@ -152,13 +152,13 @@ class GenerateHashesCommand : Callable<Int> {
         validate(contentHashPath = contentHashPath)
         // Check if workspacePath and bazelPath are not set and read from files if necessary
         if (!::workspacePath.isInitialized) {
-            workspacePath = readPathFromFile("/tmp/workspace_path", "workspacePath")
+            workspacePath = readPathFromFile("/tmp/bazel-diff/workspace_path", "workspacePath")
         }
         if (!::bazelPath.isInitialized) {
-            bazelPath = readPathFromFile("/tmp/bazel_path", "bazelPath")
+            bazelPath = readPathFromFile("/tmp/bazel-diff/bazel_path", "bazelPath")
         }
     var bazelStartupOptions: List<String> = if (buildBuddyMode) {
-        readBazelStartupOptionsFromFile("/tmp/bazel_startup_options")
+        readBazelStartupOptionsFromFile("/tmp/bazel-diff/bazel_startup_options")
     } else {
         emptyList()
     }
